@@ -63,9 +63,9 @@ with st.form("form_keuangan"):
     jenis = st.radio("Jenis Transaksi", ["Pemasukan", "Pengeluaran"])
 
     if jenis == "Pemasukan":
-        kategori = st.text_input("Sumber Pemasukan (misal: Gaji, Jualan, Bonus)")
+        kategori = st.text_input("Keterangan Pemasukan (misal: Gaji, Jualan, Bonus)")
     else:
-        kategori = st.text_input("Tujuan Pengeluaran (misal: Makanan, Transportasi, Belanja)")
+        kategori = st.text_input("Keterangan Pengeluaran (misal: Makanan, Transportasi, Belanja)")
 
     biaya = st.number_input("Biaya (Rp)", min_value=0.0, step=1000.0, format="%f")
     catatan = st.text_area("Catatan", placeholder="Opsional")
@@ -83,7 +83,7 @@ with st.form("form_keuangan"):
             simpan_data(data)
             st.success("✅ Data berhasil disimpan!")
         else:
-            st.warning("Mohon isi kategori dan biaya dengan benar.")
+            st.warning("Mohon isi keterangan dan biaya dengan benar.")
 
 # ---------- Menampilkan Data ----------
 df = load_data()
