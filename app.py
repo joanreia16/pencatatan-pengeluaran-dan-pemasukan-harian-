@@ -4,6 +4,7 @@ import sqlite3
 from datetime import datetime, timedelta
 from io import BytesIO
 import matplotlib.pyplot as plt
+st.cache_data.clear()
 
 # ---------- Konfigurasi ----------
 DB_FILE = 'keuangan.db'
