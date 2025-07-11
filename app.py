@@ -7,6 +7,7 @@ from io import BytesIO
 # ---------- Konfigurasi ----------
 DB_FILE = 'keuangan.db'
 TABLE_NAME = 'catatan_keuangan'
+BATAS_PENGELUARAN_MINGGUAN = 350000
 
 # ---------- Fungsi Database ----------
 def init_db():
@@ -138,3 +139,24 @@ if not df_mingguan.empty:
     st.bar_chart(grafik)
 else:
     st.info("Belum ada data minggu ini.")
+
+# ---------- Pengeluaran Mingguan ----------
+st.subheader("🔍 Pengawasan Mingguan")
+pengeluaran_mingguan = df_mingguan[df_mingguan['Jenis'] == 'Pengeluaran']['Jumlah'].sum()
+st.write(f"Total pengeluaran minggu ini: **Rp {pengeluaran_mingguan:,.0f}**")
+
+if pengeluaran_mingguan > BATAS_PENGELUARAN_MINGGUAN:
+    st.error(f"⚠️ Pengeluaran melebihi batas mingguan Rp {BATAS_PENGELUARAN_MINGGUAN:,.0f}!")
+else:
+    st.success("✅ Pengeluaran masih dalam batas aman.")
+
+# ---------- Kategori Pengeluaran Terbesar ----------
+st.subheader("🏷️ Kategori Pengeluaran Terbesar")
+kategori_terbesar = df[df['Jenis'] == 'Pengeluaran'].groupby('Kategori')['Jumlah'].sum().sort_values(ascending=False)
+
+if not kategori_terbesar.empty:
+    terbesar = kategori_terbesar.idxmax()
+    jumlah_terbesar = kategori_terbesar.max()
+    st.write(f"Kategori yang paling banyak menghabiskan uang: **{terbesar}** (Rp {jumlah_terbesar:,.0f})")
+else:
+    st.info("Belum ada data pengeluaran untuk dianalisis.")
