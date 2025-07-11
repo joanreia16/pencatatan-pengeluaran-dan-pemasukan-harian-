@@ -62,23 +62,23 @@ with st.form("form_keuangan"):
     tanggal = st.date_input("Tanggal", value=datetime.today())
     jenis = st.radio("Jenis Transaksi", ["Pemasukan", "Pengeluaran"])
     kategori = st.text_input("Kategori / Barang")
-    jumlah = st.number_input("Jumlah (Rp)", min_value=0.0, step=1000.0, format="%f")
+    biaya = st.number_input("Biaya (Rp)", min_value=0.0, step=1000.0, format="%f")
     catatan = st.text_area("Catatan", placeholder="Opsional")
     submit = st.form_submit_button("Simpan")
 
     if submit:
-        if kategori and jumlah > 0:
+        if kategori and biaya > 0:
             data = {
                 'Tanggal': tanggal.strftime("%Y-%m-%d"),
                 'Jenis': jenis,
                 'Kategori': kategori,
-                'Jumlah': jumlah,
+                'Jumlah': biaya,
                 'Catatan': catatan
             }
             simpan_data(data)
             st.success("✅ Data berhasil disimpan!")
         else:
-            st.warning("Mohon isi kategori dan jumlah dengan benar.")
+            st.warning("Mohon isi kategori dan biaya dengan benar.")
 
 # ---------- Menampilkan Data ----------
 df = load_data()
@@ -148,12 +148,11 @@ kategori_pie = df[df['Jenis'] == 'Pengeluaran'].groupby('Kategori')['Jumlah'].su
 
 if not kategori_pie.empty:
     fig, ax = plt.subplots(figsize=(6, 6))
-    colors = plt.cm.Paired.colors  # Warna lebih menarik
+    colors = plt.cm.Paired.colors
     ax.pie(kategori_pie, labels=kategori_pie.index, autopct='%1.1f%%', startangle=90, colors=colors)
     ax.set_title('Distribusi Pengeluaran per Kategori')
-    ax.axis('equal')  # Menjaga lingkaran tetap bulat
+    ax.axis('equal')
     st.pyplot(fig)
-
 else:
     st.info("Belum ada data pengeluaran untuk ditampilkan.")
 
