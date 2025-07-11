@@ -3,6 +3,7 @@ import pandas as pd
 import sqlite3
 from datetime import datetime, timedelta
 from io import BytesIO
+import matplotlib.pyplot as plt
 
 # ---------- Konfigurasi ----------
 DB_FILE = 'keuangan.db'
@@ -132,13 +133,26 @@ else:
 # ---------- Grafik Mingguan ----------
 st.subheader("📅 Grafik Mingguan")
 minggu_ini = datetime.today() - timedelta(days=6)
-df_mingguan = df[df['Tanggal'] >= minggu_ini]
+df_mingguan = df[df['Tanggal'] >= minggu_ini].copy()
+df_mingguan['Tanggal'] = df_mingguan['Tanggal'].dt.date
 
 if not df_mingguan.empty:
     grafik = df_mingguan.groupby(['Tanggal', 'Jenis'])['Jumlah'].sum().unstack().fillna(0)
     st.bar_chart(grafik)
 else:
     st.info("Belum ada data minggu ini.")
+
+# ---------- Grafik Pie Kategori Pengeluaran ----------
+st.subheader("🥧 Grafik Pie Pengeluaran per Kategori")
+kategori_pie = df[df['Jenis'] == 'Pengeluaran'].groupby('Kategori')['Jumlah'].sum()
+
+if not kategori_pie.empty:
+    fig, ax = plt.subplots()
+    ax.pie(kategori_pie, labels=kategori_pie.index, autopct='%1.1f%%', startangle=90)
+    ax.axis('equal')
+    st.pyplot(fig)
+else:
+    st.info("Belum ada data pengeluaran untuk ditampilkan.")
 
 # ---------- Pengeluaran Mingguan ----------
 st.subheader("🔍 Pengawasan Mingguan")
