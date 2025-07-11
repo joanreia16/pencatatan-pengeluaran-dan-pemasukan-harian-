@@ -111,7 +111,24 @@ col1.metric("Total Pemasukan", f"Rp {pemasukan:,.0f}")
 col2.metric("Total Pengeluaran", f"Rp {pengeluaran:,.0f}")
 col3.metric("Saldo", f"Rp {saldo:,.0f}", delta_color="inverse")
 
-# Grafik mingguan
+# ---------- Kesimpulan Gaya Hidup ----------
+st.subheader("🧠 Kesimpulan Gaya Hidup")
+
+if pemasukan > 0:
+    rasio = pengeluaran / pemasukan
+    if rasio >= 0.9:
+        st.error("💸 Gaya hidup terlalu boros")
+        st.write("Rekomendasi: Kurangi pengeluaran pada kategori seperti makanan di luar, hiburan, atau belanja tidak penting.")
+    elif 0.6 <= rasio < 0.9:
+        st.info("⚖️ Gaya hidup standar")
+        st.write("Masih aman, tapi tetap waspada pada kenaikan pengeluaran bulanan.")
+    else:
+        st.success("💰 Gaya hidup hemat")
+        st.write("Bagus! Kamu mengelola uang dengan sangat efisien.")
+else:
+    st.warning("Belum ada data pemasukan untuk dianalisis.")
+
+# ---------- Grafik Mingguan ----------
 st.subheader("📅 Grafik Mingguan")
 minggu_ini = datetime.today() - timedelta(days=6)
 df_mingguan = df[df['Tanggal'] >= minggu_ini]
