@@ -61,7 +61,12 @@ st.markdown("Catat pengeluaran dan pemasukan harianmu dengan mudah.")
 with st.form("form_keuangan"):
     tanggal = st.date_input("Tanggal", value=datetime.today())
     jenis = st.radio("Jenis Transaksi", ["Pemasukan", "Pengeluaran"])
-    kategori = st.text_input("Kategori / Barang")
+
+    if jenis == "Pemasukan":
+        kategori = st.text_input("Sumber Pemasukan (misal: Gaji, Jualan, Bonus)")
+    else:
+        kategori = st.text_input("Tujuan Pengeluaran (misal: Makanan, Transportasi, Belanja)")
+
     biaya = st.number_input("Biaya (Rp)", min_value=0.0, step=1000.0, format="%f")
     catatan = st.text_area("Catatan", placeholder="Opsional")
     submit = st.form_submit_button("Simpan")
