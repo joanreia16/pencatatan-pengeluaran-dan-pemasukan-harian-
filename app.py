@@ -37,6 +37,13 @@ def simpan_data(data):
     conn.commit()
     conn.close()
 
+def hapus_data(id):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute(f"DELETE FROM {TABLE_NAME} WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+
 def load_data():
     conn = sqlite3.connect(DB_FILE)
     df = pd.read_sql_query(f"SELECT * FROM {TABLE_NAME}", conn)
@@ -97,6 +104,15 @@ if isinstance(filter_tanggal, list) and len(filter_tanggal) == 2:
 
 st.dataframe(df.sort_values(by='Tanggal', ascending=False), use_container_width=True)
 
+# Tombol Hapus Data
+st.subheader("🗑️ Hapus Data")
+id_list = df[['id', 'Tanggal', 'Jenis', 'Kategori', 'Jumlah']].copy()
+id_list['label'] = id_list.apply(lambda row: f"{row['id']} - {row['Tanggal'].date()} - {row['Jenis']} - {row['Kategori']} - Rp {row['Jumlah']:,.0f}", axis=1)
+pilih_id = st.selectbox("Pilih data yang ingin dihapus:", options=id_list['id'], format_func=lambda x: id_list.loc[id_list['id'] == x, 'label'].values[0] if x in id_list['id'].values else str(x))
+if st.button("Hapus Data Ini"):
+    hapus_data(pilih_id)
+    st.success("✅ Data berhasil dihapus. Silakan refresh halaman.")
+
 # Tombol Export Excel
 excel_file = export_excel(df)
 st.download_button(
@@ -138,46 +154,4 @@ else:
 # ---------- Grafik Mingguan ----------
 st.subheader("📅 Grafik Mingguan")
 minggu_ini = datetime.today() - timedelta(days=6)
-df_mingguan = df[df['Tanggal'] >= minggu_ini].copy()
-df_mingguan['Tanggal'] = df_mingguan['Tanggal'].dt.date
-
-if not df_mingguan.empty:
-    grafik = df_mingguan.groupby(['Tanggal', 'Jenis'])['Jumlah'].sum().unstack().fillna(0)
-    st.bar_chart(grafik)
-else:
-    st.info("Belum ada data minggu ini.")
-
-# ---------- Grafik Pie Kategori Pengeluaran ----------
-st.subheader("🥧 Grafik Pie Pengeluaran per Kategori")
-kategori_pie = df[df['Jenis'] == 'Pengeluaran'].groupby('Kategori')['Jumlah'].sum()
-
-if not kategori_pie.empty:
-    fig, ax = plt.subplots(figsize=(6, 6))
-    colors = plt.cm.Paired.colors
-    ax.pie(kategori_pie, labels=kategori_pie.index, autopct='%1.1f%%', startangle=90, colors=colors)
-    ax.set_title('Distribusi Pengeluaran per Kategori')
-    ax.axis('equal')
-    st.pyplot(fig)
-else:
-    st.info("Belum ada data pengeluaran untuk ditampilkan.")
-
-# ---------- Pengeluaran Mingguan ----------
-st.subheader("🔍 Pengawasan Mingguan")
-pengeluaran_mingguan = df_mingguan[df_mingguan['Jenis'] == 'Pengeluaran']['Jumlah'].sum()
-st.write(f"Total pengeluaran minggu ini: **Rp {pengeluaran_mingguan:,.0f}**")
-
-if pengeluaran_mingguan > BATAS_PENGELUARAN_MINGGUAN:
-    st.error(f"⚠️ Pengeluaran melebihi batas mingguan Rp {BATAS_PENGELUARAN_MINGGUAN:,.0f}!")
-else:
-    st.success("✅ Pengeluaran masih dalam batas aman.")
-
-# ---------- Kategori Pengeluaran Terbesar ----------
-st.subheader("🏷️ Kategori Pengeluaran Terbesar")
-kategori_terbesar = df[df['Jenis'] == 'Pengeluaran'].groupby('Kategori')['Jumlah'].sum().sort_values(ascending=False)
-
-if not kategori_terbesar.empty:
-    terbesar = kategori_terbesar.idxmax()
-    jumlah_terbesar = kategori_terbesar.max()
-    st.write(f"Kategori yang paling banyak menghabiskan uang: **{terbesar}** (Rp {jumlah_terbesar:,.0f})")
-else:
-    st.info("Belum ada data pengeluaran untuk dianalisis.")
+df_mingguan = df[df['Tangga
