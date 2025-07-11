@@ -147,10 +147,13 @@ st.subheader("🥧 Grafik Pie Pengeluaran per Kategori")
 kategori_pie = df[df['Jenis'] == 'Pengeluaran'].groupby('Kategori')['Jumlah'].sum()
 
 if not kategori_pie.empty:
-    fig, ax = plt.subplots()
-    ax.pie(kategori_pie, labels=kategori_pie.index, autopct='%1.1f%%', startangle=90)
-    ax.axis('equal')
+    fig, ax = plt.subplots(figsize=(6, 6))
+    colors = plt.cm.Paired.colors  # Warna lebih menarik
+    ax.pie(kategori_pie, labels=kategori_pie.index, autopct='%1.1f%%', startangle=90, colors=colors)
+    ax.set_title('Distribusi Pengeluaran per Kategori')
+    ax.axis('equal')  # Menjaga lingkaran tetap bulat
     st.pyplot(fig)
+
 else:
     st.info("Belum ada data pengeluaran untuk ditampilkan.")
 
