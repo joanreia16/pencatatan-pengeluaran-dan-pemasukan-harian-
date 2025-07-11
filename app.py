@@ -1,26 +1,56 @@
-
 import streamlit as st
 import pandas as pd
-import os
+import sqlite3
 from datetime import datetime, timedelta
-import matplotlib.pyplot as plt
+from io import BytesIO
 
 # ---------- Konfigurasi ----------
-CSV_FILE = 'data_keuangan.csv'
+DB_FILE = 'keuangan.db'
+TABLE_NAME = 'catatan_keuangan'
 
-# ---------- Fungsi ----------
+# ---------- Fungsi Database ----------
+def init_db():
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            Tanggal TEXT,
+            Jenis TEXT,
+            Kategori TEXT,
+            Jumlah REAL,
+            Catatan TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def simpan_data(data):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute(f'''
+        INSERT INTO {TABLE_NAME} (Tanggal, Jenis, Kategori, Jumlah, Catatan)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (data['Tanggal'], data['Jenis'], data['Kategori'], data['Jumlah'], data['Catatan']))
+    conn.commit()
+    conn.close()
+
 def load_data():
-    if os.path.exists(CSV_FILE):
-        return pd.read_csv(CSV_FILE)
-    else:
-        df = pd.DataFrame(columns=['Tanggal', 'Jenis', 'Kategori', 'Jumlah', 'Catatan'])
-        df.to_csv(CSV_FILE, index=False)
-        return df
+    conn = sqlite3.connect(DB_FILE)
+    df = pd.read_sql_query(f"SELECT * FROM {TABLE_NAME}", conn)
+    df['Tanggal'] = pd.to_datetime(df['Tanggal'])
+    conn.close()
+    return df
 
-def simpan_data(data_baru):
-    df = load_data()
-    df = pd.concat([df, pd.DataFrame([data_baru])], ignore_index=True)
-    df.to_csv(CSV_FILE, index=False)
+def export_excel(df):
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Laporan Keuangan')
+    output.seek(0)
+    return output
+
+# ---------- Inisialisasi DB ----------
+init_db()
 
 # ---------- UI Streamlit ----------
 st.title("📊 Catatan Keuangan Harian")
@@ -50,7 +80,6 @@ with st.form("form_keuangan"):
 
 # ---------- Menampilkan Data ----------
 df = load_data()
-df['Tanggal'] = pd.to_datetime(df['Tanggal'])
 st.subheader("📅 Data Keuangan")
 
 filter_tanggal = st.date_input("Filter tanggal", [])
@@ -60,6 +89,15 @@ if isinstance(filter_tanggal, list) and len(filter_tanggal) == 2:
     df = df[(df['Tanggal'] >= pd.to_datetime(start_date)) & (df['Tanggal'] <= pd.to_datetime(end_date))]
 
 st.dataframe(df.sort_values(by='Tanggal', ascending=False), use_container_width=True)
+
+# Tombol Export Excel
+excel_file = export_excel(df)
+st.download_button(
+    label="📥 Download Excel",
+    data=excel_file,
+    file_name="laporan_keuangan.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
 
 # ---------- Statistik dan Grafik ----------
 st.subheader("📈 Ringkasan")
