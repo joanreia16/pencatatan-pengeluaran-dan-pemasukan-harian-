@@ -113,25 +113,22 @@ st.markdown("### 🔴 Tabel Pengeluaran")
 st.dataframe(df_pengeluaran.reset_index(drop=True), use_container_width=True)
 
 # ---------- Hapus Data ----------
-if not df.empty:
-    df_sorted = df.sort_values(by='Tanggal', ascending=False)
-    df_sorted['Label'] = df_sorted.apply(
-        lambda row: f"{row['Tanggal'].date()} | {row['Jenis']} | {row['Kategori']} | Rp {row['Jumlah']:,.0f}", axis=1
-    )
+st.subheader("📋 Riwayat Terbaru & Hapus Data")
 
-    selected_labels = st.multiselect(
-        "Pilih data yang ingin dihapus:",
-        options=df_sorted['Label']
-    )
+# Hanya tampilkan 10 data terakhir
+df_recent = df.sort_values(by='Tanggal', ascending=False).head(10)
 
-    if st.button("Hapus Data Terpilih") and selected_labels:
-        ids_terpilih = df_sorted[df_sorted['Label'].isin(selected_labels)]['id'].tolist()
-        for id_ in ids_terpilih:
-            hapus_data(id_)
-        st.success(f"✅ {len(ids_terpilih)} data berhasil dihapus. Silakan refresh halaman.")
-else:
-    st.info("Belum ada data untuk dihapus.")
-
+for i, row in df_recent.iterrows():
+    col1, col2, col3, col4, col5, col6 = st.columns([2, 1.5, 2, 2, 2, 1])
+    col1.write(row['Tanggal'].date())
+    col2.write(row['Jenis'])
+    col3.write(row['Kategori'])
+    col4.write(f"Rp {row['Jumlah']:,.0f}")
+    col5.write(row['Catatan'])
+    if col6.button("🗑️", key=f"hapus_{row['id']}"):
+        hapus_data(row['id'])
+        st.success(f"Data tanggal {row['Tanggal'].date()} berhasil dihapus!")
+        st.experimental_rerun()
 
 # ---------- Export Excel ----------
 excel_file = export_excel(df)
