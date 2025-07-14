@@ -106,23 +106,23 @@ st.dataframe(df.sort_values(by='Tanggal', ascending=False), use_container_width=
 
 # ---------- Hapus Data ----------
 if not df.empty:
-    id_list = df[['id', 'Tanggal', 'Jenis', 'Kategori', 'Jumlah']].copy()
-    id_list['label'] = id_list.apply(
-        lambda row: f"{row['id']} - {row['Tanggal'].date()} - {row['Jenis']} - {row['Kategori']} - Rp {row['Jumlah']:,.0f}",
-        axis=1
+    df_sorted = df.sort_values(by='Tanggal', ascending=False)
+    df_sorted['Label'] = df_sorted.apply(
+        lambda row: f"{row['Tanggal'].date()} | {row['Jenis']} | {row['Kategori']} | Rp {row['Jumlah']:,.0f}", axis=1
     )
 
-    pilih_id = st.selectbox(
+    selected_labels = st.multiselect(
         "Pilih data yang ingin dihapus:",
-        options=id_list['id'],
-        format_func=lambda x: id_list.loc[id_list['id'] == x, 'label'].values[0]
+        options=df_sorted['Label']
     )
 
-    if st.button("Hapus Data Ini"):
-        hapus_data(pilih_id)
-        st.success("✅ Data berhasil dihapus. Silakan refresh halaman.")
+    if st.button("Hapus Data Terpilih") and selected_labels:
+        ids_terpilih = df_sorted[df_sorted['Label'].isin(selected_labels)]['id'].tolist()
+        for id_ in ids_terpilih:
+            hapus_data(id_)
+        st.success(f"✅ {len(ids_terpilih)} data berhasil dihapus. Silakan refresh halaman.")
 else:
-    st.info("Tidak ada data untuk dihapus.")
+    st.info("Belum ada data untuk dihapus.")
 
 
 # ---------- Export Excel ----------
