@@ -102,7 +102,15 @@ if isinstance(filter_tanggal, list) and len(filter_tanggal) == 2:
     start_date, end_date = filter_tanggal
     df = df[(df['Tanggal'] >= pd.to_datetime(start_date)) & (df['Tanggal'] <= pd.to_datetime(end_date))]
 
-st.dataframe(df.sort_values(by='Tanggal', ascending=False), use_container_width=True)
+# Pisahkan menjadi 2 tabel
+df_pemasukan = df[df['Jenis'] == 'Pemasukan'].sort_values(by='Tanggal', ascending=False)
+df_pengeluaran = df[df['Jenis'] == 'Pengeluaran'].sort_values(by='Tanggal', ascending=False)
+
+st.markdown("### 🟢 Tabel Pemasukan")
+st.dataframe(df_pemasukan.reset_index(drop=True), use_container_width=True)
+
+st.markdown("### 🔴 Tabel Pengeluaran")
+st.dataframe(df_pengeluaran.reset_index(drop=True), use_container_width=True)
 
 # ---------- Hapus Data ----------
 if not df.empty:
