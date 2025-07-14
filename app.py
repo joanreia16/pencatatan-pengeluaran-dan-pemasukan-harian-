@@ -105,23 +105,25 @@ if isinstance(filter_tanggal, list) and len(filter_tanggal) == 2:
 st.dataframe(df.sort_values(by='Tanggal', ascending=False), use_container_width=True)
 
 # ---------- Hapus Data ----------
-st.subheader("🗑️ Hapus Data")
-id_list = df[['id', 'Tanggal', 'Jenis', 'Kategori', 'Jumlah']].copy()
-id_list['label'] = id_list.apply(
-    lambda row: f"{row['id']} - {row['Tanggal'].date()} - {row['Jenis']} - {row['Kategori']} - Rp {row['Jumlah']:,.0f}",
-    axis=1
-)
-if not id_list.empty:
+if not df.empty:
+    id_list = df[['id', 'Tanggal', 'Jenis', 'Kategori', 'Jumlah']].copy()
+    id_list['label'] = id_list.apply(
+        lambda row: f"{row['id']} - {row['Tanggal'].date()} - {row['Jenis']} - {row['Kategori']} - Rp {row['Jumlah']:,.0f}",
+        axis=1
+    )
+
     pilih_id = st.selectbox(
         "Pilih data yang ingin dihapus:",
         options=id_list['id'],
         format_func=lambda x: id_list.loc[id_list['id'] == x, 'label'].values[0]
     )
+
     if st.button("Hapus Data Ini"):
         hapus_data(pilih_id)
         st.success("✅ Data berhasil dihapus. Silakan refresh halaman.")
 else:
     st.info("Tidak ada data untuk dihapus.")
+
 
 # ---------- Export Excel ----------
 excel_file = export_excel(df)
