@@ -3,6 +3,7 @@ import streamlit as st
 from datetime import date
 from db import init_db, simpan_data, hapus_data, load_data, update_data
 import pandas as pd
+from io import BytesIO
 
 st.set_page_config(page_title="Catatan Keuangan", layout="wide")
 
@@ -33,6 +34,23 @@ if data.empty:
     st.info("Belum ada data.")
 else:
     st.dataframe(data, use_container_width=True)
+
+    # Tombol download
+    def convert_df_to_excel(df):
+        output = BytesIO()
+        writer = pd.ExcelWriter(output, engine='xlsxwriter')
+        df.to_excel(writer, index=False, sheet_name='Laporan')
+        writer.close()
+        output.seek(0)
+        return output
+
+    excel_file = convert_df_to_excel(data)
+    st.download_button(
+        label="📥 Download Laporan Excel",
+        data=excel_file,
+        file_name="laporan_keuangan.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
     # Edit dan Hapus per baris
     for i, row in data.iterrows():
