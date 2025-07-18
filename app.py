@@ -18,7 +18,7 @@ with st.form("form_keuangan"):
     tanggal = st.date_input("Tanggal", value=datetime.today())
     jenis = st.selectbox("Jenis Transaksi", ["Pemasukan", "Pengeluaran"])
     kategori = st.text_input("Kategori", placeholder="Contoh: Gaji, Makanan, Transportasi")
-    biaya = st.number_input("Biaya (Rp)", min_value=0.0, max_value=10000.0, format="%f")
+    biaya = st.number_input("Biaya (Rp)", min_value=0.0, format="%f")
     catatan = st.text_area("Catatan", placeholder="Opsional")
     submit = st.form_submit_button("Simpan")
 
